@@ -31,13 +31,14 @@ input
     | (".", None) => ()
     | (v, Some(_number)) =>
       let (numberString, endPosition) = findForward(line->String.split(""), x, char)
+
       switch map->Map.get(`${(x - 1)->Int.toString},${y->Int.toString}`) {
-      | Some((Digit, _, Some(_), _, _)) =>
+      | Some((Digit, _, Some(_), _, _prevV, _)) =>
         map->Map.set(
           `${x->Int.toString},${y->Int.toString}`,
           (
             Digit,
-            v ++ numberString,
+            _prevV->Option.getOr("") ++ v ++ numberString,
             // Fixme
             Some(
               switch map->Map.get(`${(x - 2)->Int.toString},${y->Int.toString}`) {
@@ -46,22 +47,78 @@ input
               },
             ),
             Some(endPosition),
-            Some(v ++ numberString),
+            Some(
+              switch (
+                map->Map.get(`${(x - 2)->Int.toString},${y->Int.toString}`),
+                map->Map.get(`${(x - 1)->Int.toString},${y->Int.toString}`),
+              ) {
+              | (Some((Digit, _, _, _, str, _)), Some((Digit, _, _, _, _str', _))) =>
+                str->Option.getOr("")
+
+              | (Some((Digit, _, _, _, _, _)), Some((Symbol, _, _, _, _, _))) => v ++ numberString
+              | (Some((Symbol, _, _, _, _, _)), Some((Digit, _, _, _, v', _))) =>
+                v'->Option.getOr("") ++ v ++ numberString
+              | _ => _prevV->Option.getOr("")
+              },
+            ),
+            y,
           ),
         )
-      | Some((Digit, _, None, _, _)) =>
+      | Some((Digit, _, None, _, _, _)) =>
+        let (numberString, endPosition) = findForward(line->String.split(""), x, char)
         map->Map.set(
           `${x->Int.toString},${y->Int.toString}`,
-          (Digit, v ++ numberString, Some(x - 2), Some(endPosition), Some(v ++ numberString)),
+          (
+            Digit,
+            v ++ numberString,
+            Some(x - 2),
+            Some(endPosition),
+            Some(
+              switch (
+                map->Map.get(`${(x - 2)->Int.toString},${y->Int.toString}`),
+                map->Map.get(`${(x - 1)->Int.toString},${y->Int.toString}`),
+              ) {
+              | (Some((Digit, _, _, _, str, _)), Some((Digit, _, _, _, _str', _))) =>
+                str->Option.getOr("")
+              | (Some((Digit, _, _, _, _, _)), Some((Symbol, _, _, _, _, _))) => v ++ numberString
+              | (Some((Symbol, _, _, _, _, _)), Some((Digit, _, _, _, v', _))) =>
+                v ++ v'->Option.getOr("") ++ numberString
+
+              | _ => v ++ numberString
+              },
+            ),
+            y,
+          ),
         )
       | _ =>
+        let (numberString, endPosition) = findForward(line->String.split(""), x, char)
         map->Map.set(
           `${x->Int.toString},${y->Int.toString}`,
-          (Digit, v ++ numberString, Some(x), Some(endPosition), Some(v ++ numberString)),
+          (
+            Digit,
+            v ++ numberString,
+            Some(x),
+            Some(endPosition),
+            Some(
+              switch (
+                map->Map.get(`${(x - 2)->Int.toString},${y->Int.toString}`),
+                map->Map.get(`${(x - 1)->Int.toString},${y->Int.toString}`),
+              ) {
+              | (Some((Digit, _, _, _, str, _)), Some((Digit, _, _, _, _str', _))) =>
+                str->Option.getOr("")
+              | (Some((Digit, _, _, _, _, _)), Some((Symbol, _, _, _, _, _))) => v ++ numberString
+              | (Some((Symbol, _, _, _, _, _)), Some((Digit, _, _, _, v', _))) =>
+                v'->Option.getOr("") ++ v ++ numberString
+
+              | _ => v ++ numberString
+              },
+            ),
+            y,
+          ),
         )
       }
     | (v, None) =>
-      map->Map.set(`${x->Int.toString},${y->Int.toString}`, (Symbol, v, None, None, None))
+      map->Map.set(`${x->Int.toString},${y->Int.toString}`, (Symbol, v, None, None, None, y))
     }
   })
 })
@@ -71,78 +128,53 @@ let r =
   map
   ->Map.keys
   ->Iterator.toArray
-  ->Array.filter(key => {
+  ->Array.map(key => {
     switch map->Map.get(key) {
-    // Symbol 제거
-    | Some((Symbol, _, _, _, _)) => false
-    | Some((Digit, _, None, _, _)) => false
-    | Some((Digit, _, Some(startX), Some(endX), _)) =>
-      switch key->String.split(",") {
-      | [_, y] =>
-        switch y->Int.fromString {
-        | Some(y') => {
-            let startTopLeft =
-              map->Map.get(`${(startX - 1)->Int.toString},${(y' - 1)->Int.toString}`)
-            let startTop = map->Map.get(`${startX->Int.toString},${(y' - 1)->Int.toString}`)
-            let startTopRight =
-              map->Map.get(`${(startX + 1)->Int.toString},${(y' - 1)->Int.toString}`)
-            let startLeft = map->Map.get(`${(startX - 1)->Int.toString},${y'->Int.toString}`)
-            let startBottomLeft =
-              map->Map.get(`${(startX - 1)->Int.toString},${(y' + 1)->Int.toString}`)
-            let startBottom = map->Map.get(`${startX->Int.toString},${(y' + 1)->Int.toString}`)
-            let startBottomRight =
-              map->Map.get(`${(startX + 1)->Int.toString},${(y' + 1)->Int.toString}`)
+    | Some((Digit, _, Some(startX), Some(endX), v, y')) =>
+      let startTopLeft = map->Map.get(`${(startX - 1)->Int.toString},${(y' - 1)->Int.toString}`)
+      let startTop = map->Map.get(`${startX->Int.toString},${(y' - 1)->Int.toString}`)
+      let startTopRight = map->Map.get(`${(startX + 1)->Int.toString},${(y' - 1)->Int.toString}`)
+      let startLeft = map->Map.get(`${(startX - 1)->Int.toString},${y'->Int.toString}`)
+      let startBottomLeft = map->Map.get(`${(startX - 1)->Int.toString},${(y' + 1)->Int.toString}`)
+      let startBottom = map->Map.get(`${startX->Int.toString},${(y' + 1)->Int.toString}`)
+      let startBottomRight = map->Map.get(`${(startX + 1)->Int.toString},${(y' + 1)->Int.toString}`)
+      let endTop = map->Map.get(`${endX->Int.toString},${(y' - 1)->Int.toString}`)
+      let endTopRight = map->Map.get(`${(endX + 1)->Int.toString},${(y' - 1)->Int.toString}`)
+      let endRight = map->Map.get(`${(endX + 1)->Int.toString},${y'->Int.toString}`)
+      let endBottomRight = map->Map.get(`${(endX + 1)->Int.toString},${(y' + 1)->Int.toString}`)
+      let endBottom = map->Map.get(`${endX->Int.toString},${(y' + 1)->Int.toString}`)
+      let item =
+        [
+          startTopLeft,
+          startTop,
+          startTopRight,
+          startLeft,
+          startBottomLeft,
+          startBottom,
+          startBottomRight,
+          endTop,
+          endTopRight,
+          endRight,
+          endBottomRight,
+          endBottom,
+        ]
+        ->Array.keepSome
+        ->Array.filter(((s, _, _, _, _, _)) => s == Symbol)
 
-            let endTop = map->Map.get(`${endX->Int.toString},${(y' - 1)->Int.toString}`)
-            let endTopRight = map->Map.get(`${(endX + 1)->Int.toString},${(y' - 1)->Int.toString}`)
-            let endRight = map->Map.get(`${(endX + 1)->Int.toString},${y'->Int.toString}`)
-            let endBottomRight =
-              map->Map.get(`${(endX + 1)->Int.toString},${(y' + 1)->Int.toString}`)
-            let endBottom = map->Map.get(`${endX->Int.toString},${(y' + 1)->Int.toString}`)
-
-            switch (
-              startTopLeft,
-              startTop,
-              startTopRight,
-              startLeft,
-              startBottomLeft,
-              startBottom,
-              startBottomRight,
-              endTop,
-              endTopRight,
-              endRight,
-              endBottomRight,
-              endBottom,
-            ) {
-            | (Some((Symbol, _, _, _, _)), _, _, _, _, _, _, _, _, _, _, _)
-            | (_, Some((Symbol, _, _, _, _)), _, _, _, _, _, _, _, _, _, _)
-            | (_, _, Some((Symbol, _, _, _, _)), _, _, _, _, _, _, _, _, _)
-            | (_, _, _, Some((Symbol, _, _, _, _)), _, _, _, _, _, _, _, _)
-            | (_, _, _, _, Some((Symbol, _, _, _, _)), _, _, _, _, _, _, _)
-            | (_, _, _, _, _, Some((Symbol, _, _, _, _)), _, _, _, _, _, _)
-            | (_, _, _, _, _, _, Some((Symbol, _, _, _, _)), _, _, _, _, _)
-            | (_, _, _, _, _, _, _, Some((Symbol, _, _, _, _)), _, _, _, _)
-            | (_, _, _, _, _, _, _, _, Some((Symbol, _, _, _, _)), _, _, _)
-            | (_, _, _, _, _, _, _, _, _, Some((Symbol, _, _, _, _)), _, _)
-            | (_, _, _, _, _, _, _, _, _, _, Some((Symbol, _, _, _, _)), _)
-            | (_, _, _, _, _, _, _, _, _, _, _, Some((Symbol, _, _, _, _))) => true
-            | _ => false
-            }
-          }
-        | _ => false
-        }
-      | _ => false
-      }
-    | _ => false
+      item->Array.length > 0 ? Some(v, startX, y') : None
+    | _ => None
     }
   })
-  ->Array.reduce(0, (prev, current) => {
-    switch map->Map.get(current) {
-    | Some((_, _, _, _, Some(v))) => prev + v->Int.fromString->Option.getOr(0)
-    | _ => prev
-    }
-    // part1
-  })
+  ->Array.keepSome
+  ->Array.map(((v, v1, v2)) => (`${v1->Int.toString},${v2->Int.toString}`, v))
+  ->Map.fromArray
+  ->Map.values
+  ->Iterator.toArray
+  ->Array.keepSome
+  ->Array.map(v => v->Int.fromString)
+  ->Array.keepSome
+  ->Array.reduce(0, (prev, current) => prev + current)
+  // part1
   ->Js.log
 
 let asterisks =
@@ -153,7 +185,7 @@ let asterisks =
     switch key->String.split(",") {
     | [_x, _y] =>
       switch map->Map.get(key) {
-      | Some((Symbol, "*", _, _, _)) => true
+      | Some((Symbol, "*", _, _, _, _)) => true
       | _ => false
       }
     | _ => false
@@ -175,19 +207,19 @@ let parts = asterisks->Array.map(v => {
         let topLeft = map->Map.get(`${(x' - 1)->Int.toString},${(y' - 1)->Int.toString}`)
 
         [
-          (top, x', y' - 1),
-          (topRight, x' + 1, y' - 1),
-          (right, x' + 1, y'),
-          (bottomRight, x' + 1, y' + 1),
-          (bottom, x', y' + 1),
-          (bottomLeft, x' - 1, y' + 1),
-          (left, x' - 1, y'),
-          (topLeft, x' - 1, y' - 1),
+          (top, x'),
+          (topRight, x' + 1),
+          (right, x' + 1),
+          (bottomRight, x' + 1),
+          (bottom, x'),
+          (bottomLeft, x' - 1),
+          (left, x' - 1),
+          (topLeft, x' - 1),
         ]
-        ->Array.filterMap(((v, x, y)) => {
+        ->Array.filterMap(((v, x)) => {
           switch v {
           | Some(v') => {
-              let (s, _, _, _, _) = v'
+              let (s, _, _, _, _, y) = v'
               switch s {
               | Digit => Some((v', x, y))
               | _ => None
@@ -197,7 +229,7 @@ let parts = asterisks->Array.map(v => {
           }
         })
         ->Array.map(current => {
-          let ((_, _, startX, _, _), _, y) = current
+          let ((_, _, startX, _, _, _), _, y) = current
 
           map->Map.get(`${startX->Option.getOr(0)->Int.toString},${y->Int.toString}`)
         })
@@ -217,7 +249,7 @@ parts
 ->Array.reduce(0, (prev, current) => {
   prev +
   current->Array.reduce(1, (prev, current) => {
-    let (_, val, _, _, _) = current
+    let (_, val, _, _, _, _) = current
 
     prev * val->Int.fromString->Option.getOr(0)
   })
