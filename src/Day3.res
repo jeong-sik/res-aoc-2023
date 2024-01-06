@@ -100,17 +100,16 @@ let r =
         ->Array.keepSome
         ->Array.filter(((s, _, _, _, _)) => s == Symbol)
 
-      item->Array.length > 0 ? Some(v, startX, y') : None
+      item->Array.length > 0
+        ? Some(`${startX->Int.toString},${y'->Int.toString}`, v->Option.getOr("")->Int.fromString)
+        : None
     | _ => None
     }
   })
   ->Array.keepSome
-  ->Array.map(((v, v1, v2)) => (`${v1->Int.toString},${v2->Int.toString}`, v))
   ->Map.fromArray
   ->Map.values
   ->Iterator.toArray
-  ->Array.keepSome
-  ->Array.map(v => v->Int.fromString)
   ->Array.keepSome
   ->Array.reduce(0, (prev, current) => prev + current)
   // part1
