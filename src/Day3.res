@@ -182,6 +182,23 @@ let parts = asterisks->Array.map(v => {
   }
 })
 
+type v = Stop | Go
+
+type v2 = [@as("취소") #CANCELED]
+
+let vToString = v =>
+  switch v {
+  | Stop => ""
+  | Go => ""
+  }
+
+let vFromString = v =>
+  switch v {
+  | "stop" => Stop
+  | "go" => Go
+  | _ => Go
+  }
+
 parts
 ->Array.filter(arr => arr->Array.length == 2)
 ->Array.reduce(0, (prev, current) => {

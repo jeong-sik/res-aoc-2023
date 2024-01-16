@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@greenlabs/garter": "^0.12.0-next.0",
     "@rescript/core": "^0.6.0",
+    "@rescript/react": "^0.12.0",
     "concurrently": "^8.2.2",
     "rescript": "^11.0.0-rc.8",
     "rescript-nodejs": "^16.0.0"
@@ -14,7 +16,6 @@
     "res:build": "rescript build",
     "res:watch": "rescript build -w",
     "res:clean": "rescript clean",
-    "watch": "concurrently -n rescript,node \"yarn res:watch\" \"node --watch ./src/Day2.cjs\""
-    
+    "watch": "concurrently -n rescript,node \"yarn res:watch\" \"node --watch ./src/Day4.cjs\""
   }
 }

@@ -33,4 +33,59 @@ input
   | length => Math.pow(2., ~exp=(length - 1)->Int.toFloat)->Int.fromFloat + prev
   }
 })
+// part 1
 ->Js.log
+
+let map = Map.make()
+
+input
+->Array.map(line =>
+  switch line->String.split(":") {
+  | [gameInfo, cards] =>
+    let cardsNumber = gameInfo->String.replaceRegExp(%re("/[a-zA-Z ]/g"), "")->Int.fromString
+
+    switch (cardsNumber, cards->String.split(" | ")) {
+    | (Some(_cardsNumber'), [winningNumbers, gameNumbers]) =>
+      let currentCardNumber' = map->Map.get(_cardsNumber')
+
+      switch currentCardNumber' {
+      | Some(v) => map->Map.set(_cardsNumber', v + 1)
+      | None => map->Map.set(_cardsNumber', 1)
+      }
+
+      let winningNumbers =
+        winningNumbers
+        ->String.split(" ")
+        ->Array.filterMap(v => v->String.trim->String.length > 0 ? Some(v) : None)
+
+      let matches =
+        gameNumbers
+        ->String.split(" ")
+        ->Array.filterMap(v => v->String.trim->String.length > 0 ? Some(v) : None)
+        ->Array.filter(v => winningNumbers->Array.includes(v))
+
+      let matchedCardsNumbers = Array.fromInitializer(~length=matches->Array.length, i =>
+        i + _cardsNumber' + 1
+      )
+
+      matchedCardsNumbers->Array.forEach(cardNumber => {
+        let currentCount = map->Map.get(cardNumber)
+
+        switch (map->Map.get(_cardsNumber'), currentCount) {
+        | (Some(v'), Some(v)) => map->Map.set(cardNumber, v + v')
+        | (Some(v'), None) => map->Map.set(cardNumber, v')
+        | (None, None) => ()
+        | (_, Some(v)) => map->Map.set(cardNumber, v)
+        }
+      })
+
+      (_cardsNumber', matches->Array.length, matchedCardsNumbers)->ignore
+      matches
+    | _ => []
+    }
+  | _ => []
+  }
+)
+->ignore
+
+map->Map.values->Iterator.toArray->Array.reduce(0, (prev, cur) => prev + cur)->Js.log

@@ -124,3 +124,112 @@ let _ =
   )
   ->Array.reduce(0, (prev, current) => prev + current)
   ->Js.log
+
+open NodeJs
+
+
+let input =
+  Fs.readFileSyncWith(Global.dirname ++ "/input/day2", {encoding: "utf8"})
+  ->Buffer.toString
+  ->String.split("\n")
+
+let hasRed = 12
+let hasGreen = 13
+let hasBlue = 14
+
+let sumGameNumber = ref(0)
+let v = []
+
+v->Array.push()
+
+Array.forEach(input, gameItem => {
+  let game = String.split(gameItem, ": ")
+  switch game {
+  | [gameInfo, cubeInfo] => {
+      let gameNumber = String.split(gameInfo, " ")[1]->Option.getOr("0")->Int.fromString
+      let isPossible = ref(true)
+
+      String.split(cubeInfo, "; ")->Array.forEach(gamer =>
+        String.split(gamer, ", ")->Array.forEach(
+          cube =>
+            switch String.split(cube, " ") {
+            | [count, color] =>
+              switch (count, color) {
+              | (_, "red") =>
+                if count->Int.fromString->Option.getOr(0) > hasRed {
+                  isPossible := false
+                }
+              | (_, "green") =>
+                if count->Int.fromString->Option.getOr(0) > hasGreen {
+                  isPossible := false
+                }
+              | (_, "blue") =>
+                if count->Int.fromString->Option.getOr(0) > hasBlue {
+                  isPossible := false
+                }
+              | _ => Js.log("Color")
+              }
+            | _ => Js.log("Cube")
+            }->ignore,
+        )
+      )
+
+      if isPossible.contents {
+        sumGameNumber := sumGameNumber.contents + gameNumber->Option.getOr(0)
+      }
+    }
+  | _ => Js.log("None!!")
+  }
+})
+
+Js.log(sumGameNumber.contents)
+
+//2023 Day2 Part2
+let sumCubeCount = ref(0)
+
+Array.forEach(input, gameItem => {
+  let game = String.split(gameItem, ": ")
+  switch game {
+  | [_, cubeInfo] => {
+      let redCount = ref(0)
+      let greenCount = ref(0)
+      let blueCount = ref(0)
+
+      String.split(cubeInfo, "; ")->Array.forEach(gamer =>
+        String.split(gamer, ", ")->Array.forEach(
+          cube =>
+            switch String.split(cube, " ") {
+            | [count, color] =>
+              switch (count, color) {
+              | (_, "red") =>
+                if count->Int.fromString->Option.getOr(0) > redCount.contents {
+                  redCount := count->Int.fromString->Option.getOr(0)
+                }
+              | (_, "green") =>
+                if count->Int.fromString->Option.getOr(0) > greenCount.contents {
+                  greenCount := count->Int.fromString->Option.getOr(0)
+                }
+              | (_, "blue") =>
+                if count->Int.fromString->Option.getOr(0) > blueCount.contents {
+                  blueCount := count->Int.fromString->Option.getOr(0)
+                }
+              | _ => ()
+              }
+            | _ => ()
+            }->ignore,
+        )
+      )
+
+      sumCubeCount :=
+        sumCubeCount.contents + redCount.contents * greenCount.contents * blueCount.contents
+    }
+  | _ => Js.log("None!!")
+  }
+})
+
+Js.log(sumCubeCount.contents)
+
+ 
+let v = []->Array.getUnsafe(1)
+
+let result = v + 1

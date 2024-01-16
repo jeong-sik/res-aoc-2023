@@ -9,10 +9,27 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@greenlabs/garter@^0.12.0-next.0":
+  version "0.12.0-next.0"
+  resolved "https://registry.yarnpkg.com/@greenlabs/garter/-/garter-0.12.0-next.0.tgz#7df041280c4b5166b584752f5b53a86329716e7f"
+  integrity sha512-AdZr+W5mTY5RTvSGlCmazM11NiMzkNZXQ6JjFHcdZm06YQ52dtkxfl2cUWxsbp9rnx1/78j+nxzfWHKaq6Vf4w==
+  dependencies:
+    "@rescript/std" "11.0.0-beta.3"
+
 "@rescript/core@^0.6.0":
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/@rescript/core/-/core-0.6.0.tgz#d2aae335c2a91dd68acce0ec11716861e08500d5"
   integrity sha512-D4ykxSpbmxbQa99kCg6/DztwCNt1tV3t11BLSOvJPHNLSIuQxfAU3ddgRruaH9LQSKOrMUjxQS9z6RdG5iFPoA==
+
+"@rescript/react@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@rescript/react/-/react-0.12.0.tgz#d72f0561ec9c4ae04c5db0a752087190ba7d3f40"
+  integrity sha512-EBLsf5rD7sJOjgfLLGwuLw/hONszc3UtYnIVgv7OdTyUNR41/m4deVm62PI0agvr3kWakXz4KchKRSd+19/bRA==
+
+"@rescript/std@11.0.0-beta.3":
+  version "11.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@rescript/std/-/std-11.0.0-beta.3.tgz#a37bfe53f00baf8e4bf26510df0973b849b53c33"
+  integrity sha512-xA+IY0Mm0jd5GDVGKdeJBLgQAkcdFFir9acMAeqp8ebF+cyZ61I71n/RP8NvsZ2SqTuuXQ4KvS8nB7XOA/SKdg==
 
 ansi-regex@^5.0.1:
   version "5.0.1"
